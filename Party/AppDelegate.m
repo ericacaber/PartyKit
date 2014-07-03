@@ -7,6 +7,13 @@
 //
 
 #import "AppDelegate.h"
+#import "HomeViewController.h"
+
+@interface AppDelegate ()
+
+@property (nonatomic, strong) HomeViewController *vc;
+@property (nonatomic,retain) UINavigationController *navController;
+@end
 
 @implementation AppDelegate
 
@@ -17,8 +24,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
-    self.window.backgroundColor = [UIColor whiteColor];
+    self.vc = [[HomeViewController alloc] initWithNibName:@"HomeViewController" bundle:nil];
+    self.navController = [[UINavigationController alloc] initWithRootViewController:self.vc];
+    self.window.rootViewController = self.navController;
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -48,6 +56,24 @@
 - (void)applicationWillTerminate:(UIApplication *)application
 {
     // Saves changes in the application's managed object context before the application terminates.
+    
+    [self deleteData];
+}
+
+-(void)deleteData {
+    
+    NSManagedObjectContext *context = [[HomeViewController sharedController] managedObjectContext];
+    NSError *error = nil;
+    
+    NSFetchRequest *fetchRequest = [[NSFetchRequest alloc] init];
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"Participants"
+                                              inManagedObjectContext:context];
+    [fetchRequest setEntity:entity];
+    NSArray *fetchedObjects = [context executeFetchRequest:fetchRequest error:&error];
+    for (NSManagedObject *info in fetchedObjects) {
+        [context deleteObject:info];
+    }
+    
     [self saveContext];
 }
 
